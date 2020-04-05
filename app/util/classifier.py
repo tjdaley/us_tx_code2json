@@ -141,7 +141,7 @@ def classify(line: str, context: dict) -> (bool, dict):
 
     if context['section_number']:
         if context.get('text', None):
-            context['text'] += ' ' + line
+            context['text'] += '\n\n' + line
 
     return context
 
