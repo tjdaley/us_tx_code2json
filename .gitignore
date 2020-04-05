@@ -1,5 +1,7 @@
 # Codified statutes in JSON format
 *-Chapter-*.json
+# Whoosh index
+index/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
