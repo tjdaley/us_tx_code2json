@@ -77,29 +77,9 @@ To download and process just the crypto chapter of the estates code, use this co
 python appy.py --code es --chapter 2001
 ```
 
-### Calculate Child Support
-This utility is implemented as a slash command:
-
-```
-/cs 
-```
-
-It does not process any parameters because I don't know how to set default values in a modal.
-
-When it runs, a modal dialog will appear and prompt the user for basic information. (For a more rigorous
-implementation that takes into consider multiple jobs and non-earned income AND produces trial exhibits,
-see Attorney Bot.) All fields *above* the horizonatal line are required. Scrolling below the horizontal line
-reveals additional, but less commonly used settings such as union dues and a self-employment flag.
-
-After the user clicks the **CALCULATE** button, the modal is dismissed and a child support report appears
-as an ephemeral message in the channel in which the slash command was invoked.
-
-TODO: If you invoke the slash command from your DM or IM channel, you will NOT get a report. I don't know
-why that is. It may be because the bot has to be installed by the user into their workspace?
-
 ## Virtual Environment
 
-From the slackservice folder:
+From the us_tx_code2json folder:
 
 **To Activate** (*Linux ONLY*)
 ```
@@ -113,4 +93,4 @@ deactivate
 
 ## Author
 
-Thomas J. Daley, J.D. is an active family law litigation attorney practicing primarily in Collin County, Texas, an occassional mediator, and software developer.
+Thomas J. Daley, J.D. is an active family law litigation attorney practicing primarily in Collin County, Texas, an occassional mediator, and software developer. [Web Site](https://koonsfuller.com/attorneys/tom-daley/)
