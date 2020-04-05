@@ -52,20 +52,20 @@ def main(args):
 
 def create_index(args):
     schema = Schema(
-        code_name=TEXT(),
-        title=TEXT,
-        subtitle=TEXT,
-        chapter=TEXT,
-        subchapter=TEXT,
+        code_name=TEXT(stored=True),
+        title=TEXT(stored=True),
+        subtitle=TEXT(stored=True),
+        chapter=TEXT(stored=True),
+        subchapter=TEXT(stored=True),
         section_number=TEXT(stored=True),
         section_name=TEXT(stored=True),
         text=TEXT(stored=True),
-        future_effective_date=DATETIME
+        future_effective_date=DATETIME(stored=True)
     )
 
     if not os.path.exists(INDEX_PATH):
         os.mkdir(INDEX_PATH)
-    ix = create_in(INDEX_PATH, schema)
+    create_in(INDEX_PATH, schema)
     print(f"Index created at this path: {INDEX_PATH}")
 
 
@@ -112,6 +112,14 @@ if __name__ == '__main__':
         help="Chapter number to process instead of entire codified law"
     )
     parser.add_argument(
+        "--get",
+        required=False,
+        help="Indicates whether to go get the statutory text",
+        action='store_const',
+        const=True,
+        default=False
+    )
+    parser.add_argument(
         '--index',
         required=False,
         help="Indicates whether to run the indexing process. If omitted, will just download and text-prep the codified statutes",
@@ -129,13 +137,11 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
 
-    if not args.index and not args.create_index:
-        main(args)
-        exit()
-
     if args.create_index:
         create_index(args)
-        exit()
+
+    if args.get:
+        main(args)
 
     if args.index:
         index_content(args)
