@@ -1,0 +1,7 @@
+{
+    "code_name": "FA",
+    "chapter_range_low": 1,
+    "chapter_range_high": 266,
+    "add_chapters": ["35A"],
+    "skip_chapters" : []
+}
