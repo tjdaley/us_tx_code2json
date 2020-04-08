@@ -1,5 +1,6 @@
 {
     "code_name": "ES",
+    "code_full_name": "Texas Estates Code",
     "chapter_range_low": 21,
     "chapter_range_high": 1358,
     "add_chapters": ["2001"],

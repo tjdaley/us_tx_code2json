@@ -1,5 +1,6 @@
 {
     "code_name": "CP",
+    "code_full_name": "Texas Civil Practice & Remedies Code",
     "chapter_range_low": 1,
     "chapter_range_high": 174,
     "add_chapters": ["36A", "74A", "75A", "78A", "91A", "92A", "95A", "98A", "98B", "100A", "129A", "134A", "140A", "142A", "150A"],

@@ -7,20 +7,28 @@ import argparse
 import glob
 import json
 import os
-from whoosh.index import create_in, open_dir
-from whoosh.fields import DATETIME, Schema, TEXT
+from whoosh.index import create_in, exists_in, open_dir
 from util.classifier import Classifier
 from util.htmltotext import HtmlToText
 from util.retriever import Retriever
+import util.functions as FN
 
-INDEX_PATH = 'index'
+INDEX_PATH = FN.INDEX_PATH
+
+
+def progress_bar(total, current):
+    bar = 'Progress: ['
+    percent = int(current/total*100)
+    bar += '*' * percent
+    bar += ' ' * (100-percent)
+    bar += ']'
+    print(bar, end='\r')
 
 
 def main(args):
     classifier = Classifier()
     htmltotexter = HtmlToText()
-    with open(f'codes/{args.code.lower()}.json', 'r') as config_file:
-        config = json.load(config_file)
+    config = FN.code_config(args.code)
     code_name = config['code_name']
     retriever = Retriever('https://statutes.capitol.texas.gov', code_name)
 
@@ -50,41 +58,86 @@ def main(args):
         print("json saved")
 
 
+def edit_code_files(args):
+    """
+    Modify this method as needed to do whatever file editing needs to be done.
+    """
+    config = FN.code_config(args.code)
+    files = glob.glob(f"{config['code_name']}-Chapter-*.json")
+    prog_total = len(files)
+    prog_current = 0
+    for file in files:
+        prog_current += 1
+        if args.progress:
+            progress_bar(prog_total, prog_current)
+        try:
+            with open(file, 'r') as fp:
+                sections = json.load(fp)
+        except Exception as e:
+            print(f'\n Error reading {file}: {str(e)}')
+            break
+        for section in sections:
+            section['code'] = config['code_name']
+        try:
+            with open(file, 'w') as fp:
+                json.dump(sections, fp, indent=4)
+        except Exception as e:
+            print(f'\nError writing {file}: {str(e)}')
+            break
+
+    print('\n')
+
+
 def create_index(args):
-    schema = Schema(
-        code_name=TEXT(stored=True),
-        title=TEXT(stored=True),
-        subtitle=TEXT(stored=True),
-        chapter=TEXT(stored=True),
-        subchapter=TEXT(stored=True),
-        section_number=TEXT(stored=True),
-        section_name=TEXT(stored=True),
-        text=TEXT(stored=True),
-        future_effective_date=DATETIME(stored=True)
-    )
+    schema = FN.schema()
 
     if not os.path.exists(INDEX_PATH):
         os.mkdir(INDEX_PATH)
-    create_in(INDEX_PATH, schema)
-    print(f"Index created at this path: {INDEX_PATH}")
+    ix_name = FN.index_name(args)
+    create_in(INDEX_PATH, schema, indexname=ix_name)
+    print(f"Index '{ix_name}' created at this path: {INDEX_PATH}")
 
 
 def index_content(args):
-    with open(f'codes/{args.code.lower()}.json', 'r') as config_file:
-        config = json.load(config_file)
+    config = FN.code_config(args.code)
+    ix_name = FN.index_name(None)
 
-    index = open_dir(INDEX_PATH)
+    # Create index if it does not already exist.
+    if not FN.index_exists(args):
+        create_index(args)
 
-    files = glob.glob(f"{config['code_name']}-Chapter-*.json")
+    # Open our index
+    index = FN.open_index(args)
+
+    # Process every section in this codified law
+    if not args.chapter:
+        files = glob.glob(f"{config['code_name']}-Chapter-*.json")
+    else:
+        files = [f"{config['code_name']}-Chapter-{args.chapter}.json"]
+
+    prog_total = len(files)
+    prog_current = 0
     for file in files:
+        # Open next chapter in the codified law
         with open(file, 'r') as chapter_file:
             chapter = json.load(chapter_file)
+
+        # If we don't have any sections in that chapter, there was probably a
+        # snafu upstream, but there's nothing we can do about it now. skip it.
+        if not chapter:
+            continue
+
+        # We have a chapter with sections . . . process them
+        if not args.quiet and not args.progress:
+            print('-' * 80)
+            print(chapter[0]['chapter'], "- indexing")
         with index.writer(limitmb=256, procs=3, multisegment=True) as writer:
             for section in chapter:
                 section_number = section.get('section_number')
                 section_name = section.get('section_name')
                 chapter_name = section.get('chapter')
-                print(f"Indexing {section_number} - {section_name}", end='')
+                if not args.quiet and not args.progress:
+                    print(f"Indexing {section_number} - {section_name}", end='')
                 writer.add_document(
                     code_name=section.get('code_name'),
                     title=section.get('title'),
@@ -93,10 +146,17 @@ def index_content(args):
                     subchapter=section.get('subchapter'),
                     section_number=section_number,
                     section_name=section_name,
-                    text=section.get('text')
+                    text=section.get('text'),
+                    code=section.get('code')
                 )
-                print(" - added")
-        print(f"{chapter_name} - committed")
+                if not args.quiet and not args.progress:
+                    print(" - added")
+        if not args.quiet and not args.progress:
+            print(f"{chapter_name} - committed to index {ix_name}")
+        if args.progress:
+            prog_current += 1
+            progress_bar(prog_total, prog_current)
+    print('')
 
 
 if __name__ == '__main__':
@@ -128,21 +188,37 @@ if __name__ == '__main__':
         default=False
     )
     parser.add_argument(
-        '--create_index',
+        '--edit',
         required=False,
-        help="Indicates whether to create the initial index schema",
+        help="Indicates whether edit_code_files() is to be called.",
         action='store_const',
         const=True,
         default=False
     )
-    args = parser.parse_args()
+    parser.add_argument(
+        '--quiet',
+        required=False,
+        help="Indicates whether we run as silently as we know how.",
+        action='store_const',
+        const=True,
+        default=False
+    )
+    parser.add_argument(
+        '--progress',
+        required=False,
+        help="Indicates whether to display a progress bar instead of progress messages.",
+        action='store_const',
+        const=True,
+        default=False
+    )
 
-    if args.create_index:
-        create_index(args)
+    args = parser.parse_args()
 
     if args.get:
         main(args)
 
+    if args.edit:
+        edit_code_files(args)
+
     if args.index:
         index_content(args)
-        exit()

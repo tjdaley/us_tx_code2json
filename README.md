@@ -89,12 +89,11 @@ Encode Texas Codified Laws
 optional arguments:
   -h, --help         show this help message and exit
   --code CODE        Two-letter abbreviation for code to process
-  --chapter CHAPTER  Chapter number to process instead of entire codified law
+  --chapter CHAPTER  Chapter number to process instead of entire codified law. Combine with --get or --index
   --get              Indicates whether to go get the statutory text
   --index            Indicates whether to run the indexing process. If
                      omitted, will just download and text-prep the codified
                      statutes
-  --create_index     Indicates whether to create the initial index schema
 ```
 
 ### To create the search index

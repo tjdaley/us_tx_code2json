@@ -1,5 +1,6 @@
 {
     "code_name": "FA",
+    "code_full_name": "Texas Family Code",
     "chapter_range_low": 1,
     "chapter_range_high": 266,
     "add_chapters": ["35A"],

@@ -1,0 +1,8 @@
+{
+    "code_name": "PE",
+    "code_full_name": "Texas Penal Code",
+    "chapter_range_low": 1,
+    "chapter_range_high": 50,
+    "add_chapters": ["20A", "33A", "35A", "71"],
+    "skip_chapters" : []
+}
