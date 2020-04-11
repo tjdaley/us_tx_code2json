@@ -9,9 +9,13 @@ import os
 
 from whoosh.index import exists_in, open_dir
 from whoosh.fields import DATETIME, Schema, TEXT
+import dotenv
 
+# Load environment variables
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+dotenv.load_dotenv(dotenv_path)
 
-INDEX_PATH = 'index'
+INDEX_PATH = os.environ.get('INDEX_PATH', 'index')
 
 
 def schema():
