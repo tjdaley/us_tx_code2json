@@ -11,7 +11,12 @@ from whoosh.index import create_in, exists_in, open_dir
 from util.classifier import Classifier
 from util.htmltotext import HtmlToText
 from util.retriever import Retriever
+import dotenv
 import util.functions as FN
+
+# Load environment variables
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+dotenv.load_dotenv(dotenv_path)
 
 INDEX_PATH = FN.INDEX_PATH
 
@@ -23,6 +28,10 @@ def progress_bar(total, current):
     bar += ' ' * (100-percent)
     bar += ']'
     print(bar, end='\r')
+
+
+def section_file_name(code_name: str, chap_num: str) -> str:
+    return f'codes/sections/{code_name}-Chapter-{chap_num}.json'
 
 
 def main(args):
@@ -50,10 +59,10 @@ def main(args):
             continue
         text_content = htmltotexter.get_text(html_content)
         print("txt extracted", end=" - ")
-        code = classifier.classify_doc(text_content)
+        code = classifier.classify_doc(text_content, args.code)
         print("classified", end=" - ")
         chap_num = str(chapter).rjust(5, '0')
-        with open(f'{code_name}-Chapter-{chap_num}.json', 'w') as json_file:
+        with open(section_file_name(code_name, chap_num), 'w') as json_file:
             json.dump(code, json_file)
         print("json saved")
 
@@ -63,7 +72,7 @@ def edit_code_files(args):
     Modify this method as needed to do whatever file editing needs to be done.
     """
     config = FN.code_config(args.code)
-    files = glob.glob(f"{config['code_name']}-Chapter-*.json")
+    files = glob.glob(section_file_name(config['code_name'], '*'))
     prog_total = len(files)
     prog_current = 0
     for file in files:
@@ -111,9 +120,9 @@ def index_content(args):
 
     # Process every section in this codified law
     if not args.chapter:
-        files = glob.glob(f"{config['code_name']}-Chapter-*.json")
+        files = glob.glob(section_file_name(config['code_name'], '*'))
     else:
-        files = [f"{config['code_name']}-Chapter-{args.chapter}.json"]
+        files = [section_file_name(config['code_name'], args.chapter)]
 
     prog_total = len(files)
     prog_current = 0
