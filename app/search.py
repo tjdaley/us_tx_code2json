@@ -28,6 +28,7 @@ while query_text != '':
             code = doc.get('code', default_code)
             if code != default_code:
                 print(f"{code}: {code_name} Section {section_number} - {section_name}\n")
+                print(doc.get('title', "NO TITLE"))
                 print(doc.highlights('text'))
                 print('-' * 120)
 
