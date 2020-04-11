@@ -1,0 +1,8 @@
+{
+    "code_name": "BC",
+    "code_full_name": "Texas Business and Commerce Code",
+    "chapter_range_low": 1,
+    "chapter_range_high": 762,
+    "add_chapters": ["2A", "4A", "21A", "604A", "2001", "2002", "2004"],
+    "skip_chapters" : []
+}

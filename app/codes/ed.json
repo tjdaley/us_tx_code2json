@@ -1,0 +1,8 @@
+{
+    "code_name": "ED",
+    "code_full_name": "Texas Education Code",
+    "chapter_range_low": 1,
+    "chapter_range_high": 163,
+    "add_chapters": ["12A", "30A", "39A", "53A", "51A", "51B", "53B", "58A", "109A"],
+    "skip_chapters" : []
+}

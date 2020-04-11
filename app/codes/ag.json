@@ -1,0 +1,8 @@
+{
+    "code_name": "AG",
+    "code_full_name": "Texas Agriculture Code",
+    "chapter_range_low": 1,
+    "chapter_range_high": 303,
+    "add_chapters": ["12A", "14A", "44A", "50A", "50B", "50C", "50D"],
+    "skip_chapters" : []
+}
