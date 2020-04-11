@@ -8,10 +8,11 @@ import re
 
 
 class Classifier(object):
-    def classify_doc(self, text_content: str) -> dict:
+    def classify_doc(self, text_content: str, code: str) -> dict:
         lines = text_content.split('\n')
         doc = []
         context = {}
+        context['code'] = code
         context['code_name'] = None
         context['title'] = None
         context['subtitle'] = None
@@ -40,7 +41,7 @@ class Classifier(object):
 
 
 def extract_code_name(line: str) -> str:
-    match = re.findall(r'^([A-Z\s]+) CODE', line)
+    match = re.findall(r'^([A-Z\-\s]+) CODE', line)
     if match:
         return match[0]
     return None
