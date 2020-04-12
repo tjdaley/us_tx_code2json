@@ -8,7 +8,7 @@ import re
 
 
 class Classifier(object):
-    def classify_doc(self, text_content: str, code: str) -> dict:
+    def classify_doc(self, text_content: str, code: str, filename: str) -> dict:
         lines = text_content.split('\n')
         doc = []
         context = {}
@@ -21,8 +21,10 @@ class Classifier(object):
         context['section_number'] = None
         context['section_name'] = None
         context['text'] = None
+        context['filename'] = filename
         context['future_effective_date'] = None
         context['save_section'] = False
+        context['source_text'] = text_content
         prior_context = context.copy()
 
         for line in lines:
