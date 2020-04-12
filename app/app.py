@@ -6,7 +6,11 @@ Copyright (c) 2020 by Thomas J. Daley, J.D.
 import argparse
 import glob
 import json
+import shutil
 import os
+
+import boto3
+from botocore.exceptions import ClientError, NoCredentialsError
 from whoosh.index import create_in, exists_in, open_dir
 from util.classifier import Classifier
 from util.htmltotext import HtmlToText
@@ -59,12 +63,39 @@ def main(args):
             continue
         text_content = htmltotexter.get_text(html_content)
         print("txt extracted", end=" - ")
-        code = classifier.classify_doc(text_content, args.code)
-        print("classified", end=" - ")
+
         chap_num = str(chapter).rjust(5, '0')
-        with open(section_file_name(code_name, chap_num), 'w') as json_file:
+        code_file = section_file_name(code_name, chap_num)
+        code = classifier.classify_doc(text_content, args.code, code_file)
+        print("classified", end=" - ")
+        with open(code_file, 'w') as json_file:
             json.dump(code, json_file)
         print("json saved")
+
+
+def zip_index(args) -> str:
+    archive_file = 'index'
+    algorithm = 'zip'
+    shutil.make_archive(archive_file, algorithm, FN.INDEX_PATH)
+    return f'{archive_file}.{algorithm}'
+
+
+def upload_index(args):
+    archive_file = zip_index(args)
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=os.environ.get('aws_access_key_id'),
+        aws_secret_access_key=os.environ.get('aws_secret_access_key')
+    )
+    try:
+        response = s3_client.upload_file(archive_file, 'codesearch.attorney.bot', archive_file)
+    except NoCredentialsError as e:
+        print(str(e))
+        return False
+    except ClientError as e:
+        print(str(e))
+        return False
+    return True
 
 
 def edit_code_files(args):
@@ -220,6 +251,14 @@ if __name__ == '__main__':
         const=True,
         default=False
     )
+    parser.add_argument(
+        '--upload',
+        required=False,
+        help="Indicates whether to upload the index.",
+        action='store_const',
+        const=True,
+        default=False
+    )
 
     args = parser.parse_args()
 
@@ -231,3 +270,6 @@ if __name__ == '__main__':
 
     if args.index:
         index_content(args)
+
+    if args.upload:
+        upload_index(args)
