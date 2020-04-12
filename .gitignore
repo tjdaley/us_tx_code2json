@@ -3,6 +3,7 @@
 # Whoosh index
 index/
 index.zip
+code_configs.zip
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
