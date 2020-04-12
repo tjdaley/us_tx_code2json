@@ -16,6 +16,7 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 dotenv.load_dotenv(dotenv_path)
 
 INDEX_PATH = os.environ.get('INDEX_PATH', 'index')
+CODE_PATH = os.environ.get('CODE_PATH', 'codes')
 
 
 def schema():
@@ -42,7 +43,7 @@ def code_config(code_name: str) -> dict:
     Returns:
         (dict): Configuration file.
     """
-    with open(f'codes/{code_name.lower()}.json', 'r') as config_file:
+    with open(f'{CODE_PATH}/{code_name.lower()}.json', 'r') as config_file:
         config = json.load(config_file)
     return config
 
