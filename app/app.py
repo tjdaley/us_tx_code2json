@@ -23,6 +23,7 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 dotenv.load_dotenv(dotenv_path)
 
 INDEX_PATH = FN.INDEX_PATH
+CODE_PATH = FN.CODE_PATH
 
 
 def progress_bar(total, current):
@@ -80,21 +81,32 @@ def zip_index(args) -> str:
     return f'{archive_file}.{algorithm}'
 
 
+def zip_code_configs(args) -> str:
+    archive_file = 'code_configs'
+    algorithm = 'zip'
+    shutil.make_archive(archive_file, algorithm, FN.CODE_PATH)
+    return f'{archive_file}.{algorithm}'
+
+
 def upload_index(args):
-    archive_file = zip_index(args)
+    zip_functions = [zip_index, zip_code_configs]
     s3_client = boto3.client(
         's3',
         aws_access_key_id=os.environ.get('aws_access_key_id'),
         aws_secret_access_key=os.environ.get('aws_secret_access_key')
     )
-    try:
-        response = s3_client.upload_file(archive_file, 'codesearch.attorney.bot', archive_file)
-    except NoCredentialsError as e:
-        print(str(e))
-        return False
-    except ClientError as e:
-        print(str(e))
-        return False
+
+    for fn in zip_functions:
+        archive_file = fn(args)
+        try:
+            response = s3_client.upload_file(archive_file, 'codesearch.attorney.bot', archive_file)
+        except NoCredentialsError as e:
+            print(str(e))
+            return False
+        except ClientError as e:
+            print(str(e))
+            return False
+
     return True
 
 
