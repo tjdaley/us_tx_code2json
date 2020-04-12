@@ -127,6 +127,15 @@ python app.py --code fa --get --index
 ```
 The above command will download and index the Texas Family Code
 
+### Upload search index
+*After all the codes have been indexed, upload the index to Amazon's S3 service. Once the index has been uploaded,
+restart any server that uses the index, e.g. **restutil**.*
+
+```
+python app.py --code fa --upload
+```
+(The ```--code``` flag is necessary, for now, but ignored)
+
 ## Virtual Environment
 
 From the us_tx_code2json folder:
