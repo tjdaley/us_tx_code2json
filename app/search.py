@@ -24,12 +24,16 @@ while query_text != '':
             section_number = doc.get('section_number', "NO SECTION NUMBER")
             section_name = doc.get('section_name', "NO SECTION NAME")
             text = doc.get('text', "NO TEXT")
+            source_text = doc.get('source_text', "NO SOURCE TEXT")
             default_code = "NO CODE"
+            prefix = doc.get('section_prefix', 'Sec.')
             code = doc.get('code', default_code)
             if code != default_code:
-                print(f"{code}: {code_name} Section {section_number} - {section_name}\n")
-                print(doc.get('title', "NO TITLE"))
-                print(doc.highlights('text'))
+                print(f"{code}: {code_name}")
+                print("Title", doc.get('title', "NO TITLE"))
+                print(f"{prefix} {section_number} - {section_name}\n")
                 print('-' * 120)
+                print(source_text)
+                print('=' * 120)
 
     query_text = input("Query: ")
