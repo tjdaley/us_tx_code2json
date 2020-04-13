@@ -18,21 +18,22 @@ class Classifier(object):
         context['subtitle'] = None
         context['chapter'] = None
         context['subchapter'] = None
+        context['section_prefix'] = None
         context['section_number'] = None
         context['section_name'] = None
         context['text'] = None
         context['filename'] = filename
         context['future_effective_date'] = None
         context['save_section'] = False
-        context['source_text'] = text_content
+        context['source_text'] = ''
         prior_context = context.copy()
 
-        for line in lines:
-            line = clean(line)
+        for source_line in lines:
+            line = clean(source_line)
             if not line:
                 continue
 
-            context = classify(line, context)
+            context = classify(line, context, source_line)
 
             if prior_context['section_number'] != context['section_number'] and prior_context['text']:
                 del prior_context['save_section']
@@ -46,6 +47,11 @@ def extract_code_name(line: str) -> str:
     match = re.findall(r'^([A-Z\-\s]+) CODE', line)
     if match:
         return match[0]
+
+    match = re.findall(r'^CODE OF ([A-Z\-\s]+)', line)
+    if match:
+        return match[0]
+
     return None
 
 
@@ -80,8 +86,13 @@ def extract_subchapter_name(line: str) -> str:
 def extract_section(line: str) -> str:
     match = re.findall(r'^Sec\. (\d+\.[\dA-Za-z]+)\. ([0-9A-Z\,\;\:\-\s]+)\. (.*)', line)
     if match:
-        return match[0]
-    return None, None, None
+        return match[0][0], match[0][1], match[0][2], 'Sec.'
+
+    match = re.findall(r'^Art\. (\d+\.[\dA-Za-z]+)\. ([0-9A-Z\,\;\:\-\s]+)\. (.*)', line)
+    if match:
+        return match[0][0], match[0][1], match[0][2], 'Art.'
+
+    return None, None, None, None
 
 
 def is_legislative_history(line: str):
@@ -98,7 +109,7 @@ def is_legislative_history(line: str):
     return False
 
 
-def classify(line: str, context: dict) -> (bool, dict):
+def classify(line: str, context: dict, source_line: str) -> (bool, dict):
     context['save_section'] = False
 
     code_name = extract_code_name(line)
@@ -134,17 +145,20 @@ def classify(line: str, context: dict) -> (bool, dict):
     if is_legislative_history(line):
         return context
 
-    section_number, section_name, code = extract_section(line)
+    section_number, section_name, code, prefix = extract_section(line)
     if section_number:
         context['save_section'] = context['section_number'] != section_number
+        context['section_prefix'] = prefix
         context['section_number'] = section_number.strip()
         context['section_name'] = section_name.strip()
         context['text'] = code.strip()
+        context['source_text'] = source_line
         return context
 
     if context['section_number']:
         if context.get('text', None):
             context['text'] += '\n\n' + line
+            context['source_text'] += ('\n\n' + source_line)
 
     return context
 
