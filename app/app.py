@@ -12,6 +12,7 @@ import os
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 from whoosh.index import create_in, exists_in, open_dir
+from whoosh.qparser import QueryParser
 from util.classifier import Classifier
 from util.htmltotext import HtmlToText
 from util.retriever import Retriever
@@ -193,6 +194,15 @@ def create_index(args):
     print(f"Index '{ix_name}' created at this path: {INDEX_PATH}")
 
 
+def delete_code(args):
+    config = FN.code_config(args.code)
+    index = FN.open_index(args)
+    parser = QueryParser('code', FN.schema())
+    query = parser.parse(config['code_name'])
+    index.delete_by_query(query)
+    index.close()
+
+
 def index_content(args):
     config = FN.code_config(args.code)
     ix_name = FN.index_name(None)
@@ -239,10 +249,13 @@ def index_content(args):
                     subtitle=section.get('subtitle'),
                     chapter=chapter_name,
                     subchapter=section.get('subchapter'),
+                    section_prefix=section.get('section_prefix', 'Sec.'),
                     section_number=section_number,
                     section_name=section_name,
                     text=section.get('text'),
-                    code=section.get('code')
+                    source_text=section.get('source_text'),
+                    code=section.get('code'),
+                    filename=section.get('filename')
                 )
                 if not args.quiet and not args.progress:
                     print(" - added")
@@ -330,11 +343,22 @@ if __name__ == '__main__':
         const=True,
         default=False
     )
+    parser.add_argument(
+        '--delete',
+        required=False,
+        help="Instructs that a code is to be removed from the index.",
+        action='store_const',
+        const=True,
+        default=False
+    )
 
     args = parser.parse_args()
 
     if args.download_config or args.download_index:
         download_index(args)
+
+    if args.delete:
+        delete_code(args)
 
     if args.get:
         main(args)
