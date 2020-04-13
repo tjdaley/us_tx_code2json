@@ -27,9 +27,12 @@ def schema():
         subtitle=TEXT(stored=True),
         chapter=TEXT(stored=True),
         subchapter=TEXT(stored=True),
+        section_prefix=TEXT(stored=True),
         section_number=TEXT(stored=True),
         section_name=TEXT(stored=True),
         text=TEXT(stored=True),
+        source_text=TEXT(stored=True),
+        filename=TEXT(stored=True),
         future_effective_date=DATETIME(stored=True)
     )
 
