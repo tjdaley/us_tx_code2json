@@ -110,6 +110,49 @@ def upload_index(args):
     return True
 
 
+def download_index(args) -> bool:
+    # Instantiate AWS client to access S3 resources
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=os.environ.get('aws_access_key_id'),
+        aws_secret_access_key=os.environ.get('aws_secret_access_key')
+    )
+    s3_bucket_name = os.environ.get('S3_BUCKET_NAME', 'codesearch.attorney.bot')
+
+    # List of archives we will download from S3
+    archives = []
+    if args.download_index:
+        archives.append({'object_name': 'index.zip', 'destination': FN.INDEX_PATH})
+    if args.download_config:
+        archives.append({'object_name': 'code_configs.zip', 'destination': FN.CODE_PATH})
+
+    # Here to download and open the archives
+    for archive in archives:
+        destination = archive['destination']
+        object_name = archive['object_name']
+
+        # Create destination path, if it does not exist
+        if not os.path.exists(destination):
+            os.mkdir(destination)
+
+        # Connect to S3 and download the archive to a binary file
+        try:
+            file_name = f'{destination}/{object_name}'
+            with open(file_name, 'wb') as fp:
+                s3_client.download_fileobj(s3_bucket_name, object_name, fp)
+        except NoCredentialsError as e:
+            print(str(e))
+            return False
+        except ClientError as e:
+            print(str(e))
+            return False
+
+        # Unpack the archive to its destination folder
+        shutil.unpack_archive(file_name, destination, 'zip')
+
+    return True
+
+
 def edit_code_files(args):
     """
     Modify this method as needed to do whatever file editing needs to be done.
@@ -215,7 +258,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Encode Texas Codified Laws')
     parser.add_argument(
         '--code',
-        required=True,
+        required=False,
         help="Two-letter abbreviation for code to process"
     )
     parser.add_argument(
@@ -271,8 +314,27 @@ if __name__ == '__main__':
         const=True,
         default=False
     )
+    parser.add_argument(
+        '--download_index',
+        required=False,
+        help="Indicates whether to download the index.",
+        action='store_const',
+        const=True,
+        default=False
+    )
+    parser.add_argument(
+        '--download_config',
+        required=False,
+        help="Indicates whether to download the code config files.",
+        action='store_const',
+        const=True,
+        default=False
+    )
 
     args = parser.parse_args()
+
+    if args.download_config or args.download_index:
+        download_index(args)
 
     if args.get:
         main(args)
