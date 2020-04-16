@@ -4,5 +4,5 @@ for code in "${codes[@]}"
 do
 	python3 app.py --get --index --progress --code $code
 done
-python3 --upload
+python3 app.py --upload
 
