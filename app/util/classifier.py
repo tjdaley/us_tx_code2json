@@ -40,6 +40,7 @@ class Classifier(object):
                 doc.append(prior_context)
 
             prior_context = context.copy()
+        doc.append(context)
         return doc
 
 
@@ -115,31 +116,31 @@ def classify(line: str, context: dict, source_line: str) -> (bool, dict):
     code_name = extract_code_name(line)
     if code_name:
         context['code_name'] = code_name
-        context['text'] = None
+        # context['text'] = None
         return context
 
     title_name = extract_title_name(line)
     if title_name:
         context['title'] = title_name
-        context['text'] = None
+        # context['text'] = None
         return context
 
     subtitle_name = extract_subtitle_name(line)
     if subtitle_name:
         context['subtitle'] = subtitle_name
-        context['text'] = None
+        # context['text'] = None
         return context
 
     chapter_name = extract_chapter_name(line)
     if chapter_name:
         context['chapter'] = chapter_name
-        context['text'] = None
+        # context['text'] = None
         return context
 
     subchapter_name = extract_subchapter_name(line)
     if subchapter_name:
         context['subchapter'] = subchapter_name
-        context['text'] = None
+        # context['text'] = None
         return context
 
     if is_legislative_history(line):
