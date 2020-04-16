@@ -37,7 +37,7 @@ def progress_bar(total, current):
 
 
 def section_file_name(code_name: str, chap_num: str) -> str:
-    chapter = str(int(chap_num)).rjust(5, '0')
+    chapter = str(chap_num).rjust(5, '0')
     return f'codes/sections/{code_name}-Chapter-{chapter}.json'
 
 
