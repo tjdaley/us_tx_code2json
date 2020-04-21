@@ -4,6 +4,6 @@ for code in "${codes[@]}"
 do
 	python3 app.py --get --index --progress --code $code
 done
-python3 app.py --upload_index
+python3 app.py --upload_index --upload_config
 sudo service jdbot-restutil restart
 
