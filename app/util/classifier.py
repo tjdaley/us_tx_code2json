@@ -24,7 +24,6 @@ class Classifier(object):
         context['text'] = None
         context['filename'] = filename
         context['future_effective_date'] = None
-        context['save_section'] = False
         context['source_text'] = ''
         prior_context = context.copy()
 
@@ -36,7 +35,6 @@ class Classifier(object):
             context = classify(line, context, source_line)
 
             if prior_context['section_number'] != context['section_number'] and prior_context['text']:
-                del prior_context['save_section']
                 doc.append(prior_context)
 
             prior_context = context.copy()
@@ -85,13 +83,52 @@ def extract_subchapter_name(line: str) -> str:
 
 
 def extract_section(line: str) -> str:
+    """
+    Look for a section number. **MOST** code sections start like this:
+
+        Sec. 25.01. SECTION NAME. This is code.
+
+    where:
+        "Sec." is the section prefix (some start with "Art.")
+        "25.01" is the section number
+        "SECTION NAME" is the section name
+        "This is code." is the beginning of the statute.
+
+    However, some statutes, for sure those that have delayed effective dates,
+    will start like this:
+
+        Sec. 25.01. SECTION NAME.
+
+    And will not have any statutory text (e.g. "This is code.") following the
+    section name.
+
+    Args:
+        line (str): Line of text to be parsed.
+    Returns:
+        ()[0]: Section number
+        ()[1]: Section name
+        ()[2]: First bit of text
+        ()[3]: Section Prefix (either "Sec." or "Art.")
+    """
+    # Line has all four parts:
     match = re.findall(r'^Sec\. (\d+\.[\dA-Za-z]+)\. ([0-9A-Z\,\;\:\-\s]+)\. (.*)', line)
     if match:
         return match[0][0], match[0][1], match[0][2], 'Sec.'
 
+    # Line has only first three parts:
+    match = re.findall(r'^Sec\. (\d+\.[\dA-Za-z]+)\. ([0-9A-Z\,\;\:\-\s]+)\.', line)
+    if match:
+        return match[0][0], match[0][1], None, 'Sec.'
+
+    # Line has all four parts:
     match = re.findall(r'^Art\. (\d+\.[\dA-Za-z]+)\. ([0-9A-Z\,\;\:\-\s]+)\. (.*)', line)
     if match:
         return match[0][0], match[0][1], match[0][2], 'Art.'
+
+    # Line has only first three parts:
+    match = re.findall(r'^Art\. (\d+\.[\dA-Za-z]+)\. ([0-9A-Z\,\;\:\-\s]+)\.', line)
+    if match:
+        return match[0][0], match[0][1], None, 'Art.'
 
     return None, None, None, None
 
@@ -111,36 +148,29 @@ def is_legislative_history(line: str):
 
 
 def classify(line: str, context: dict, source_line: str) -> (bool, dict):
-    context['save_section'] = False
-
     code_name = extract_code_name(line)
     if code_name:
         context['code_name'] = code_name
-        # context['text'] = None
         return context
 
     title_name = extract_title_name(line)
     if title_name:
         context['title'] = title_name
-        # context['text'] = None
         return context
 
     subtitle_name = extract_subtitle_name(line)
     if subtitle_name:
         context['subtitle'] = subtitle_name
-        # context['text'] = None
         return context
 
     chapter_name = extract_chapter_name(line)
     if chapter_name:
         context['chapter'] = chapter_name
-        # context['text'] = None
         return context
 
     subchapter_name = extract_subchapter_name(line)
     if subchapter_name:
         context['subchapter'] = subchapter_name
-        # context['text'] = None
         return context
 
     if is_legislative_history(line):
@@ -148,18 +178,20 @@ def classify(line: str, context: dict, source_line: str) -> (bool, dict):
 
     section_number, section_name, code, prefix = extract_section(line)
     if section_number:
-        context['save_section'] = context['section_number'] != section_number
         context['section_prefix'] = prefix
         context['section_number'] = section_number.strip()
         context['section_name'] = section_name.strip()
-        context['text'] = code.strip()
+        if code:
+            context['text'] = code.strip()
+        else:
+            context['text'] = ''
         context['source_text'] = source_line
         return context
 
     if context['section_number']:
-        if context.get('text', None):
-            context['text'] += '\n\n' + line
-            context['source_text'] += ('\n\n' + source_line)
+        # if context.get('text', None):
+        context['text'] += '\n\n' + line
+        context['source_text'] += ('\n\n' + source_line)
 
     return context
 
