@@ -5,4 +5,5 @@ do
 	python3 app.py --get --index --progress --code $code
 done
 python3 app.py --upload
+sudo service jdbot-restutil restart
 
