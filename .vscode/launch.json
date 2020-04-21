@@ -12,10 +12,11 @@
             "program": "app.py",
             "cwd": "${workspaceFolder}/app",
             "args": [
-                "--code", "fa",
-                "--chapter", "2",
+                "--code", "pe",
+                "--chapter", "25",
                 "--get",
-                "--index"
+                "--index",
+                "--delete"
             ],
             "console": "integratedTerminal"
         }
