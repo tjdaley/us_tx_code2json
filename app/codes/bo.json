@@ -1,6 +1,7 @@
 {
     "code_name": "BO",
     "code_full_name": "Texas Business Organizations Code",
+    "code_short_name": "Business Organizations",
     "chapter_range_low": 1,
     "chapter_range_high": 403,
     "add_chapters": [],

@@ -1,6 +1,7 @@
 {
     "code_name": "AL",
     "code_full_name": "Texas Alcoholic Beverage Code",
+    "code_short_name": "Alcoholic Beverage",
     "chapter_range_low": 1,
     "chapter_range_high": 252,
     "add_chapters": ["12A", "48A", "62A", "62A.v2"],

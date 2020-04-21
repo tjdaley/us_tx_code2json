@@ -1,6 +1,7 @@
 {
     "code_name": "CR",
     "code_full_name": "Texas Code of Criminal Procedure",
+    "code_short_name": "Criminal Procedure",
     "chapter_range_low": 1,
     "chapter_range_high": 105,
     "add_chapters": ["7A", "7B", "17A", "18A", "18B", "19A", "20A", "24A", "32A", "42A", "46B", "46C", "56A", "56B", "57A", "57B", "57C", "57D"],

@@ -1,6 +1,7 @@
 {
     "code_name": "HS",
     "code_full_name": "Texas Health & Safety Code",
+    "code_short_name": "Health & Safety",
     "chapter_range_low": 1,
     "chapter_range_high": 842,
     "add_chapters": ["94A", "95A", "103A", "107A", "119A", "142A", "248A", "260A", "291A", "292A", "292B", "292C", "293A", "293C", "295A",

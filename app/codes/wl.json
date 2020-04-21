@@ -1,6 +1,7 @@
 {
     "code_name": "WL",
     "code_full_name": "Texas Auxiliary Water Laws",
+    "code_short_name": "Aux Water Laws",
     "chapter_range_low": 1,
     "chapter_range_high": 12,
     "add_chapters": [],
