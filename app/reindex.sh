@@ -5,6 +5,6 @@ do
         echo Indexing $code
 	python3 app.py --delete --index --progress --code $code
 done
-python3 app.py --upload
+python3 app.py --upload_index --upload_config
 sudo service jdbot-restutil restart
 

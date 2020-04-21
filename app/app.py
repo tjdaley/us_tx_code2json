@@ -89,12 +89,17 @@ def zip_index(args) -> str:
 def zip_code_configs(args) -> str:
     archive_file = 'code_configs'
     algorithm = 'zip'
-    shutil.make_archive(archive_file, algorithm, FN.CODE_PATH)
+    shutil.make_archive(archive_file, algorithm, f'{FN.CODE_PATH}/*.json')
     return f'{archive_file}.{algorithm}'
 
 
-def upload_index(args):
-    zip_functions = [zip_index, zip_code_configs]
+def upload(args):
+    zip_functions = []
+    if args.upload_index:
+        zip_functions.append(zip_index)
+    if args.upload_config:
+        zip_functions.append(zip_code_configs)
+
     s3_client = boto3.client(
         's3',
         aws_access_key_id=os.environ.get('aws_access_key_id'),
@@ -115,7 +120,7 @@ def upload_index(args):
     return True
 
 
-def download_index(args) -> bool:
+def download(args) -> bool:
     # Instantiate AWS client to access S3 resources
     s3_client = boto3.client(
         's3',
@@ -324,9 +329,17 @@ if __name__ == '__main__':
         default=False
     )
     parser.add_argument(
-        '--upload',
+        '--upload_index',
         required=False,
         help="Indicates whether to upload the index.",
+        action='store_const',
+        const=True,
+        default=False
+    )
+    parser.add_argument(
+        '--upload_config',
+        required=False,
+        help="Indicates whether to upload the code configuration files.",
         action='store_const',
         const=True,
         default=False
@@ -359,7 +372,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.download_config or args.download_index:
-        download_index(args)
+        download(args)
 
     if args.delete:
         delete_code(args)
@@ -373,5 +386,5 @@ if __name__ == '__main__':
     if args.index:
         index_content(args)
 
-    if args.upload:
-        upload_index(args)
+    if args.upload_index or args.upload_config:
+        upload(args)
